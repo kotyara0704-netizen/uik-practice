@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>УІК Практика - Панель</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Фонова анімація -->
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Екран авторизації -->
+    <div id="loginView" class="glass-wrap login-view">
+        <div class="glass-panel login-panel">
+            <h2>Авторизація</h2>
+            <p class="subtitle">УІК Практика</p>
+            
+            <div class="form-group">
+                <label>Оберіть користувача:</label>
+                <select id="loginUserSelect">
+                    <option value="" disabled selected>-- Оберіть себе --</option>
+                    <optgroup label="Керівники">
+                        <option value="s2">Дзюба Тарас</option>
+                        <option value="s3">Малик Роман</option>
+                        <option value="s1">Чуприна Юрій</option>
+                    </optgroup>
+                    <optgroup label="Курсанти">
+                        <option value="c1">Гашинська Вікторія Олександрівна</option>
+                        <option value="c2">Карпенко Анна Олександрівна</option>
+                        <option value="c3">Комендант Софія Юріївна</option>
+                        <option value="c4">Типило Іван Тарасович</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Пароль:</label>
+                <input type="password" id="loginPassword" placeholder="Введіть пароль...">
+            </div>
+
+            <p id="loginError" class="error-msg"></p>
+            <button id="loginBtn" class="btn-primary">Увійти</button>
+            <p class="hint">Пароль курсанта: 1234 | керівника: admin</p>
+        </div>
+    </div>
+
+    <!-- Головний додаток -->
+    <div id="appView" class="app-layout hidden">
+        <!-- Бокове Меню -->
+        <aside class="sidebar glass-panel">
+            <h1 class="app-logo">УІК Практика</h1>
+            
+            <div class="user-info-section">
+                <span id="currentUserLabel">Поточний користувач</span>
+                <div class="sidebar-actions">
+                    <button id="themeToggleBtn" class="btn-secondary btn-sm" title="Змінити тему">🌓 Тема</button>
+                    <button id="calendarBtn" class="btn-secondary btn-sm hidden" title="Розклад завдань">📅 Календар</button>
+                    <button id="adminBtn" class="btn-secondary btn-sm hidden" title="Керування курсантами">⚙️ Курсанти</button>
+                    <button id="reportBtn" class="btn-secondary btn-sm hidden" title="Сформувати відомість">📊 Звіт</button>
+                    <button id="exportDataBtn" class="btn-secondary btn-sm" title="Вивантажити бекап">⬇️ Бекап</button>
+                    <button id="importDataBtn" class="btn-secondary btn-sm" title="Завантажити бекап">⬆️ Відновити</button>
+                    <input type="file" id="importDataInput" style="display:none" accept=".json">
+                    <button id="changePwdBtn" class="btn-secondary btn-sm">🔒 Пароль</button>
+                    <button id="logoutBtn" class="btn-secondary btn-sm">Вийти</button>
+                </div>
+            </div>
+
+            <div class="supervisors-list">
+                <strong>Керівники:</strong><br> Дзюба Т. | Малик Р. | Чуприна Ю.
+            </div>
+
+            <!-- Годинник та Розклад -->
+            <div class="clock-widget widget">
+                <h3>🕒 Час практики</h3>
+                <div id="clockDisplay" class="clock-time">00:00:00</div>
+                <div id="scheduleStatus" class="schedule-status loader-text">Завантаження розкладу...</div>
+            </div>
+
+            <!-- Переможець Дня -->
+            <div class="daily-winner-widget widget">
+                <h3>👑 Лідер Сьогодні</h3>
+                <div id="dailyWinnerDisplay" class="daily-winner">
+                    Ще немає балів сьогодні
+                </div>
+            </div>
+
+            <!-- Таблиця лідерів (Загальний рейтинг) -->
+            <div class="leaderboard-widget widget">
+                <h3>🏆 Загальний Рейтинг</h3>
+                <ol id="leaderboardList" class="leaderboard-list">
+                    <!-- Заповнюється JS -->
+                </ol>
+            </div>
+
+            <!-- Форма для керівників (загальне завдання) -->
+            <div id="globalTaskContainer" class="global-task-form hidden">
+                <h3 style="font-size: 0.9rem; margin-bottom: 10px; color:#cbd5e1;">Додати усім:</h3>
+                <input type="text" id="globalTaskInput" placeholder="Завдання...">
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <input type="number" id="globalTaskPoints" min="1" max="10" value="10" title="Кількість балів (до 10)" style="width: 60px;">
+                    <input type="date" id="globalTaskDeadline" title="Дедлайн" style="flex:1;">
+                </div>
+                <div class="drop-zone" id="globalDropZone" style="margin-top:5px;">
+                    <span class="drop-zone-text">Зона для файлу (або клікніть)</span>
+                    <input type="file" id="globalTaskFile" class="file-input-sm drop-zone-input" title="Документ (до 500 Кб)" accept=".pdf,.doc,.docx,.jpg,.png,.txt">
+                </div>
+                <button id="addGlobalTaskBtn" class="btn-primary btn-sm" style="margin-top:5px; width:100%;">Призначити всім</button>
+            </div>
+        </aside>
+
+        <!-- Головна частина -->
+        <main class="main-content">
+            <div class="section-title">
+                <h2>Курсанти</h2>
+            </div>
+            <div id="cadetsGrid" class="cadets-grid">
+                <!-- Картки курсантів -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальне вікно завдань -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content glass-panel">
+            <span class="close-btn">&times;</span>
+            <div class="modal-header">
+                <img id="modalCadetImage" src="" alt="Photo" class="modal-photo">
+                <div class="modal-header-info">
+                    <h2 id="modalCadetName">ПІБ</h2>
+                    <p class="stats">
+                        🏆 Рейтинг: <span id="modalRating" class="rating-badge">0</span> XP
+                        <span class="divider">|</span>
+                        Завдань: <span id="modalTaskCount">0</span>
+                    </p>
+                </div>
+            </div>
+            <div class="modal-tabs" style="display:flex; gap:10px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                <button id="tabActiveTasks" class="btn-tab active" style="flex:1;">Активні</button>
+                <button id="tabArchivedTasks" class="btn-tab" style="flex:1;">Архів <span id="archivedCount" class="badge">0</span></button>
+            </div>
+            
+            <!-- Форма додавання для керівника -->
+            <div id="cadetTaskForm" class="task-input-section hidden">
+                <input type="text" id="cadetTaskInput" placeholder="Нове завдання...">
+                <input type="number" id="cadetTaskPoints" min="1" max="10" value="10" title="Кількість балів" style="flex: 0.5; min-width: 80px;">
+                <input type="date" id="cadetTaskDeadline">
+                <div class="full-width-row drop-zone" id="cadetDropZone">
+                    <span class="drop-zone-text">Зона для файлу (або клікніть)</span>
+                    <input type="file" id="cadetTaskFile" class="file-input drop-zone-input" title="Прикріпити документ (до 500 Кб)" accept=".pdf,.doc,.docx,.jpg,.png,.txt">
+                </div>
+                <div class="full-width-row">
+                    <button id="addCadetTaskBtn" class="btn-primary">Додати</button>
+                </div>
+            </div>
+
+            <ul id="taskList" class="task-list">
+                <!-- Список завдань -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Модальне вікно зміни паролю -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 400px; padding-top: 50px;">
+            <span class="close-btn" id="closePwdBtn">&times;</span>
+            <div class="modal-header">
+                <h2>Зміна паролю</h2>
+            </div>
+            <div class="form-group">
+                <label>Старий пароль:</label>
+                <input type="password" id="oldPassword" placeholder="Обов'язково...">
+            </div>
+            <div class="form-group">
+                <label>Новий пароль:</label>
+                <input type="password" id="newPassword" placeholder="Мінімум 3 символи...">
+            </div>
+            <p id="pwdError" class="error-msg"></p>
+            <button id="savePwdBtn" class="btn-primary">Зберегти новий пароль</button>
+        </div>
+    </div>
+
+    <!-- Модальне вікно календаря керівника -->
+    <div id="calendarModal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 800px;">
+            <span class="close-btn" id="closeCalendarBtn">&times;</span>
+            <div class="modal-header">
+                <h2>📅 Розклад завдань (Календар)</h2>
+            </div>
+            <div id="calendarContainer" class="calendar-container">
+                <!-- Календар або шкала часу -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно Переможця Дня -->
+    <div id="winnerModal" class="modal winner-modal">
+        <div class="winner-content">
+            <h1 class="winner-title">🎉 ПЕРЕМОЖЕЦЬ ДНЯ! 🏆</h1>
+            <img id="winnerPhoto" class="winner-photo" src="" alt="Winner">
+            <h2 id="winnerName" class="winner-name">Ім'я</h2>
+            <p class="winner-stats"><span id="winnerPoints">0</span> XP за сьогодні!</p>
+            <button id="closeWinnerBtn" class="btn-primary" style="margin-top:20px; max-width: 200px;">Супер!</button>
+        </div>
+        
+        <!-- Конфетті (CSS анімація) -->
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+    </div>
+
+    <!-- Модальне вікно керування курсантами -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 600px;">
+            <span class="close-btn" id="closeAdminBtn">&times;</span>
+            <div class="modal-header">
+                <h2>⚙️ Керування курсантами</h2>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <h3>Додати нового курсанта</h3>
+                <input type="text" id="newCadetName" placeholder="ПІБ курсанта (обов'язково)" style="margin-bottom: 10px;">
+                <div class="drop-zone" id="newCadetPhotoDropZone" style="margin-bottom: 10px;">
+                    <span class="drop-zone-text">Перетягніть фото (до 1 Мб)</span>
+                    <input type="file" id="newCadetPhoto" class="drop-zone-input" accept=".jpg,.png,.jpeg">
+                </div>
+                <button id="addNewCadetBtn" class="btn-primary btn-sm">Додати</button>
+            </div>
+
+            <div class="form-group">
+                <h3>Список курсантів</h3>
+                <ul id="adminCadetList" class="admin-cadet-list">
+                    <!-- Заповнюється JS -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно Звітності -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 800px;">
+            <span class="close-btn" id="closeReportBtn">&times;</span>
+            <div class="modal-header">
+                <h2>📊 Відомість успішності</h2>
+            </div>
+            <div class="report-actions" style="margin-bottom: 15px;">
+                <button class="btn-primary" onclick="window.print()">🖨️ Друк</button>
+            </div>
+            <div id="reportContainer" class="printable-report">
+                <!-- Таблиця генерується JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно редагування завдання -->
+    <div id="editTaskModal" class="modal" style="z-index: 1100;">
+        <div class="modal-content glass-panel" style="max-width: 500px;">
+            <span class="close-btn" id="closeEditTaskBtn">&times;</span>
+            <h2>✏️ Редагувати завдання</h2>
+            <div class="form-group">
+                <input type="text" id="editTaskTextInput" placeholder="Текст завдання...">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <input type="number" id="editTaskPointsInput" min="1" max="10" title="Кількість балів">
+                <input type="date" id="editTaskDeadlineInput" title="Дедлайн">
+            </div>
+            <button id="saveEditTaskBtn" class="btn-primary" style="margin-top:15px;">Зберегти зміни</button>
+        </div>
+    </div>
+
+    <!-- Лібіотеки Firebase (Compat версія для сумісності з поточним кодом) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
